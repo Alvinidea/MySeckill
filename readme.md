@@ -112,6 +112,14 @@ Q5：Caused by: java.lang.IllegalArgumentException: 找到多个名为spring_web
 > https://www.icode9.com/content-4-628789.html
 > https://blog.csdn.net/Linwang2020/article/details/117480977?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2.pc_relevant_default&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-2.pc_relevant_default&utm_relevant_index=5
 
-
+Q6：静态资源js，css等加载不了
+> 将js，css对应文件放置在WEB-INF的同一级文件夹中，
+> 也就是如下结构：
+> webapp
+>     css
+>     js
+>     WEB-INF
+>
+Q7：测试前端页面时候，注意刷新浏览器缓存
 
 

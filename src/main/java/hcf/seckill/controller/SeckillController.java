@@ -84,10 +84,11 @@ public class SeckillController {
     @RequestMapping(value = "/{seckillId}/{md5}/execution"
             ,method = RequestMethod.POST
             ,produces = {"application/json;charset=utf-8"})
+    @ResponseBody
     public SeckillResult<SeckillExecution> execute(
                 @PathVariable("seckillId") Long seckillId
                 ,@PathVariable("md5") String md5
-                ,@CookieValue(value = "killPhone", required = false) Long phone){
+                ,@CookieValue(value = "killPhone", required = false) Long phone){ // 从Cookie中获取数据
         //验证phone或者spring MVC验证（此处没有）
         if(phone == null){
             return new SeckillResult<SeckillExecution>(false, "未注册");
