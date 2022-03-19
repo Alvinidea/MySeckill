@@ -43,4 +43,9 @@
         <property name="basePackage" value="hcf.seckill.dao"/>
     </bean>
 
+    <!--redisDao交给IOC管理-->
+    <bean id="redisDao" class="hcf.seckill.dao.cache.RedisDao">
+        <constructor-arg index="0" value="localhost"></constructor-arg>
+        <constructor-arg index="1" value="6379"></constructor-arg>
+    </bean>
 </beans>
