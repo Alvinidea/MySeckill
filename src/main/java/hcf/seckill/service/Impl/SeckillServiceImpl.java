@@ -36,7 +36,7 @@ public class SeckillServiceImpl implements SeckillService {
     @Autowired
     private SuccessKilledDao successKilledDao;
 
-    // 盐，用于混淆MD5
+    // 盐，MD5混淆因子
     private final String slat = "lsdfjolghoaes&**(sdgfklsfaf&&*(seorfihdsnj";
 
     public List<Seckill> getSeckillList() {
@@ -77,13 +77,14 @@ public class SeckillServiceImpl implements SeckillService {
         return md5;
     }
 
-    @Transactional
+
     /**
      * 使用注解控制事务方法的优点：
      *  1、开发团队达成一致约定，约定明确标注事务方法的编程风格。
      *  2、保证事务方法的 执行时间尽可能短 ，不要穿插其他的网络操作（RPC/HTTP请求），或者剥离到方法外面。
      *  3、不是所有的方法都需要事务，如：只有一条修改操作、只读操作。
      */
+    @Transactional(rollbackFor = Exception.class)
     public SeckillExecution executeSeckill(long seckillId, long userPhone, String md5) throws SeckillException, RepeatKillException, SeckillCloseException {
         if(md5 == null || !md5.equals(getMD5(seckillId))){
             throw new SeckillException("Seckill data rewrite!!!");
@@ -93,7 +94,7 @@ public class SeckillServiceImpl implements SeckillService {
         try {
             // 减库存
             int updateNum = seckillDao.reduceNumber(seckillId, nowTime);
-            if (updateNum <= 0) {
+            if (updateNum <= 0) { //
                 // 更新记录失败，未秒杀成功，秒杀结束
                 throw new SeckillCloseException("hcf.seckill already closed!!!");
             } else {
@@ -101,16 +102,19 @@ public class SeckillServiceImpl implements SeckillService {
                 int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
                 if (insertCount <= 0) { //seckillId-userPhone唯一
                     //重复秒杀
-                    throw new RepeatKillException("hcf.seckill repeat");
+                    throw new RepeatKillException("hcf.seckill repeat"); // TODO 如果失败了还是会减库存 ？？？
                 } else {
+                    //秒杀成功
                     SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
                     return new SeckillExecution(seckillId, SeckillStateEnum.SUCCESS,
                             successKilled);
                 }
             }
         }catch (SeckillCloseException e1){
+            logger.error(e1.getMessage(), e1);
             throw e1;
         }catch (RepeatKillException e2){
+            logger.error(e2.getMessage(), e2);
             throw e2;
         }catch (Exception e){
             logger.error(e.getMessage(), e);

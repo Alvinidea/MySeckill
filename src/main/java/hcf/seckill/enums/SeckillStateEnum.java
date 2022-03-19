@@ -1,7 +1,7 @@
 package hcf.seckill.enums;
 
 /**
- * 使用枚举表示常量
+ * 使用枚举表示常量（秒杀状态情况）
  * @author hechaofan
  * @date 2022/3/17 15:31
  */

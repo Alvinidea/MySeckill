@@ -89,7 +89,7 @@ public class SeckillController {
                 @PathVariable("seckillId") Long seckillId
                 ,@PathVariable("md5") String md5
                 ,@CookieValue(value = "killPhone", required = false) Long phone){ // 从Cookie中获取数据
-        //验证phone或者spring MVC验证（此处没有）
+        // 验证phone或者spring MVC验证（此处没有）
         if(phone == null){
             return new SeckillResult<SeckillExecution>(false, "未注册");
         }
@@ -103,8 +103,7 @@ public class SeckillController {
         }catch(SeckillCloseException e){
             SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.END);
             result = new SeckillResult<SeckillExecution>(true, execution);
-        }
-        catch (Exception e){
+        }catch (Exception e){
             SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.INNER_ERROR);
             result = new SeckillResult<SeckillExecution>(true, execution);
         }

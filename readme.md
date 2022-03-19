@@ -122,4 +122,24 @@ Q6：静态资源js，css等加载不了
 >
 Q7：测试前端页面时候，注意刷新浏览器缓存
 
+Q8：异常被你的 catch“吃了”导致 @Transactional 失效
+> “吃了” : 在catch中没有重新将异常抛出
+>  https://www.cnblogs.com/frankyou/p/12691463.html
 
+Q9：MySQL 如何查看表的存储引擎
+> mysql> show create table test;                 
+  +-------+----------------------------------------------+
+  | Table | Create Table                                 |
+  +-------+----------------------------------------------+
+  | test  | CREATE TABLE `test` (
+    `id` int(11) DEFAULT NULL,
+    `name` varchar(12) DEFAULT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
+  +-------+----------------------------------------------+
+  1 row in set (0.00 sec)
+
+Q10：Tomcat10的坑，可能导致404等问题
+>  Tomcat9正常运行，但是Tomcat10出现404
+>  https://www.cnblogs.com/djma/p/15684017.html
+>  https://blog.csdn.net/qq_34325222/article/details/105922739?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~aggregatepage~first_rank_ecpm_v1~rank_v31_ecpm-8-105922739.pc_agg_new_rank&utm_term=9+tomcat10+%E5%8C%BA%E5%88%AB&spm=1000.2123.3001.4430
+>> 原因：servlet包名竟然不是叫javax!!是jaraka
