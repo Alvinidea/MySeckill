@@ -32,7 +32,7 @@ import java.util.Map;
  */
 @Service
 public class SeckillServiceImpl implements SeckillService {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private SeckillDao seckillDao;
