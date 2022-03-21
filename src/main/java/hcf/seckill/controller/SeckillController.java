@@ -24,6 +24,8 @@ import java.util.List;
  */
 
 /**
+ * 基础阶段：
+ *      实现DB design + DAO + Service + Controller
  * /hcf.seckill/list
  * /hcf.seckill/{seckillId}/detail
  * /hcf.seckill/{seckillId}/exposer

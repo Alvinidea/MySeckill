@@ -71,7 +71,7 @@ public class SeckillServiceImpl implements SeckillService {
          */
         Seckill seckill = redisDao.getSeckill(seckillId);
         if(seckill == null){
-            seckill = seckillDao.queryById(seckillId); //2访问数据库
+            seckill = seckillDao.queryById(seckillId); //2 访问数据库
             if(seckill == null) {
                 return new Exposer(false, seckillId);
             }else{  //放入redis

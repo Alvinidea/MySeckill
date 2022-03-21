@@ -16,7 +16,8 @@
 </head>
 <body>
     <h2>Hello World!</h2>
-
+    <img src="/img/test.png"/>
+    <%--<img src="/WEB-INF/test/test.png"/>--%>
     <ul class="list-group">
         <li class="list-group-item">
             <span class="badge">new</span>
@@ -26,7 +27,8 @@
         <li class="list-group-item"> waiting deal...</li>
     </ul>
 </body>
-
+<script src="/js/seckill2.js" type="text/javascript"></script>
+<%--<script src="/WEB-INF/static/js/seckill2.js" type="text/javascript"></script>--%>
 <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
 <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->

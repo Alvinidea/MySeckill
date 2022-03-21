@@ -1,5 +1,7 @@
 package hcf.seckill.enums;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * 使用枚举表示常量（秒杀状态情况）
  * @author hechaofan
@@ -18,6 +20,8 @@ public enum SeckillStateEnum {
         this.state = state;
         this.stateInfo = stateInfo;
     }
+
+
 
     public int getState() {
         return state;

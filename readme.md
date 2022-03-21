@@ -143,3 +143,18 @@ Q10：Tomcat10的坑，可能导致404等问题
 >  https://www.cnblogs.com/djma/p/15684017.html
 >  https://blog.csdn.net/qq_34325222/article/details/105922739?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~aggregatepage~first_rank_ecpm_v1~rank_v31_ecpm-8-105922739.pc_agg_new_rank&utm_term=9+tomcat10+%E5%8C%BA%E5%88%AB&spm=1000.2123.3001.4430
 >> 原因：servlet包名竟然不是叫javax!!是jaraka
+
+Q11：静态资源放在放在webapp和放在WEB-INF下的区别
+> 1、当静态资源放在webapp下面的时候，可直接通过浏览器访问，不需要配置映射，安全性略低
+> 
+> 2、WEB-INF是Java的WEB应用的安全目录。所谓安全就是客户端无法访问，只有服务端可以访问的目录。
+> 当静态资源放在WEB-INF下面的时候，外部是不能直接访问的，一般是在springmvc的配置文件中配置资源映射
+> 如：
+> <!-- 资源映射 -->
+```
+    <mvc:resources location="/WEB-INF/css/" mapping="/css/**"/>
+    <mvc:resources location="/WEB-INF/js/" mapping="/js/**"/>
+```
+> webapp与WEB—INF的区别:https://blog.csdn.net/weixin_40159122/article/details/104889928
+
+  
