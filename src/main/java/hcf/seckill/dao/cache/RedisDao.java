@@ -91,6 +91,8 @@ public class RedisDao {
         return null;
     }
 
+
+
     private String calInventoryKey(long seckillId){
         String key = "seckillInventory:"+seckillId;
         return key;
@@ -150,7 +152,6 @@ public class RedisDao {
     public Long incrInventory(long seckillId) {
         return operateInventory(seckillId, 1);
     }
-
     /****
      * 自增自减操作
      * @param seckillId
@@ -223,7 +224,5 @@ public class RedisDao {
         }
         return null;
     }
-
-
 
 }

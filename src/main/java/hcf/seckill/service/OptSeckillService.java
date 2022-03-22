@@ -1,5 +1,6 @@
 package hcf.seckill.service;
 
+import hcf.seckill.dto.Exposer;
 import hcf.seckill.dto.SeckillExecution;
 import hcf.seckill.exception.RepeatKillException;
 import hcf.seckill.exception.SeckillCloseException;
@@ -10,6 +11,15 @@ import hcf.seckill.exception.SeckillException;
  * @date 2022/3/21 16:11
  */
 public interface OptSeckillService {
+
+
+    /**
+     * 秒杀开启时输出秒杀接口地址，否则输出系统时间和秒杀时间
+     * @param seckillId
+     * @return
+     */
+    Exposer exportSeckillUrl(long seckillId);
+
     /**
      * 执行秒杀操作
      * @param seckillId

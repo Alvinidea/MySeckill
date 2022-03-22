@@ -3,6 +3,7 @@ package hcf.seckill.controller;
 import hcf.seckill.dto.Exposer;
 import hcf.seckill.dto.SeckillExecution;
 import hcf.seckill.dto.SeckillResult;
+import hcf.seckill.entity.Seckill;
 import hcf.seckill.enums.SeckillStateEnum;
 import hcf.seckill.exception.RepeatKillException;
 import hcf.seckill.exception.SeckillCloseException;
@@ -13,7 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author hechaofan
@@ -23,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @Controller
-@RequestMapping(value = "/V2Seckill")
+@RequestMapping(value = "/optSeckill")
 public class OptSeckillController extends BaseController{
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -34,6 +39,28 @@ public class OptSeckillController extends BaseController{
     @Autowired
     private OptSeckillService optSeckillService;
 
+    @RequestMapping(value="/list", method = RequestMethod.GET)
+    public String list(Model model){
+        //list.jsp + model = ModelAndView
+        List<Seckill> list = seckillService.getSeckillList();
+        model.addAttribute("list", list);
+        return "optList";  //等同于 WEB-INF/jsp/list.jsp
+    }
+
+    @RequestMapping(value="/{seckillId}/detail", method = RequestMethod.GET)
+    public String detail(
+            @PathVariable("seckillId") Long seckillId
+            , Model model){
+        if(seckillId == null){
+            return "redirect:/optSeckill/list";
+        }
+        Seckill seckill = seckillService.getById(seckillId);
+        if(seckill == null){
+            return "forward:/optSeckill/list";
+        }
+        model.addAttribute("seckill", seckill);
+        return "optDetail";
+    }
     /***
      * 获取秒杀接口
      * @param seckillId
@@ -48,7 +75,7 @@ public class OptSeckillController extends BaseController{
     public SeckillResult<Exposer> exposer(Long seckillId){
         SeckillResult<Exposer> seckillResult;
         try{
-            Exposer exposer = seckillService.exportSeckillUrl(seckillId);
+            Exposer exposer = optSeckillService.exportSeckillUrl(seckillId);
             seckillResult = new SeckillResult<Exposer>(true, exposer);
         }catch (Exception e){
             logger.error(e.getMessage(), e);
@@ -62,7 +89,7 @@ public class OptSeckillController extends BaseController{
      * @param seckillId
      * @return
      */
-    @RequestMapping(value = "/{seckillId}/{md5}/V2execution"
+    @RequestMapping(value = "/{seckillId}/{md5}/execution"
             ,method = RequestMethod.POST
             ,produces = {"application/json;charset=utf-8"})
     @ResponseBody
@@ -91,5 +118,12 @@ public class OptSeckillController extends BaseController{
             result = new SeckillResult<SeckillExecution>(true, execution);
         }
         return result;
+    }
+
+    @RequestMapping(value = "/time/now", method = RequestMethod.GET)
+    @ResponseBody
+    public SeckillResult<Long> time(){
+        Date now = new Date();
+        return new SeckillResult<Long>(true, now.getTime());
     }
 }
