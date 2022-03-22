@@ -9,5 +9,8 @@
         <module name="MySeckill" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="MyRocketMQ" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>

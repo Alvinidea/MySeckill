@@ -157,4 +157,56 @@ Q11：静态资源放在放在webapp和放在WEB-INF下的区别
 ```
 > webapp与WEB—INF的区别:https://blog.csdn.net/weixin_40159122/article/details/104889928
 
+## 优化阶段 1 
   
+  对秒杀核心功能进行优化，主要是通过Redis缓解DB的压力
+```java
+public SeckillExecution executeSeckill(long seckillId, long userPhone, String md5)
+                 throws SeckillException, RepeatKillException, SeckillCloseException{
+    // ...
+    return null;
+}
+```
+  优化思路图
+  https://www.processon.com/view/60c5c42c1efad418c9052111
+  
+## 优化阶段 2 
+
+通过消息队列实现秒杀、下单、支付的解耦
+
+### 优缺点
+> 优势：
+>> 解耦、异步、削峰
+> 
+> 劣势：
+>> 系统可用性降低，不确定性增加，系统引入的外部依赖越多，越容易挂掉。
+>> 系统复杂度提高，多了一个模块
+>> 一致性问题, BCD 三个系统那里，BD 两个系统操作成功了，结果 C 系统操作失败了...
+>
+
+### MQ选型
+
+
+ActiveMQ
+> 没经过大规模吞吐量场景的验证，社区不活跃
+
+RabbitMQ 
+> 2007发布，erlang 语言开发（扩展和二次开发成本高），开源，比较稳定的支持，活跃度也高，性能一般
+
+RocketMQ
+> 2012阿里出品，java开发，活跃的中文社区，
+
+Kafka 
+> Kafka 是大数据领域的实时计算、日志采集等场景业内标准，Scala 和 Java 语言开发，社区活跃度很高
+
+
+参考
+> https://www.cnblogs.com/carsonwuu/p/10399527.html
+> https://zhuanlan.zhihu.com/p/86812691
+> https://www.jianshu.com/p/19a94c1c729b
+
+### RocketMQ的相关网站
+
+https://gitee.com/apache/rocketmq/tree/master/docs/cn
+https://github.com/apache/rocketmq/tree/master/docs/cn
+https://rocketmq.apache.org/docs/quick-start/

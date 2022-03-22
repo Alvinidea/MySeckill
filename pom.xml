@@ -7,7 +7,6 @@
   <groupId>hcf.seckill</groupId>
   <artifactId>MySeckill</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>war</packaging>
 
   <name>MySeckill Maven Webapp</name>
   <!-- FIXME change it to the project's website -->
@@ -170,6 +169,12 @@
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.1</version>
+    </dependency>
+    <!--配置消息队列中间件 依赖包-->
+    <dependency>
+      <groupId>org.apache.rocketmq</groupId>
+      <artifactId>rocketmq-client</artifactId>
+      <version>5.0.0-PREVIEW</version>
     </dependency>
   </dependencies>
 

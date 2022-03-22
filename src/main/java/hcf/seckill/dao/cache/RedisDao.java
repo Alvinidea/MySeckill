@@ -14,9 +14,7 @@ import redis.clients.jedis.params.SetParams;
  * @author hechaofan
  * @date 2022/3/19 15:53
  *
- * 在redis中存储的都是字节码：
- * key = 字节码
- * value = 字节码
+
  */
 public class RedisDao {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -32,6 +30,9 @@ public class RedisDao {
 
     /***
      * 获取键
+     *  * 在redis中存储的都是字节码：
+     *  * key = 字节码
+     *  * value = 字节码
      * @param seckillId
      * @return
      */
@@ -66,7 +67,6 @@ public class RedisDao {
         }
         return null;
     }
-
     public String setSeckill(Seckill seckill){
         //set Object(Seckill)->序列化->byte[]
         try{
