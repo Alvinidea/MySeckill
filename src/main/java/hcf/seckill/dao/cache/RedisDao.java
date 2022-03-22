@@ -225,4 +225,77 @@ public class RedisDao {
         return null;
     }
 
+
+
+
+    private String calRepeatSeckillKey(long seckillId){
+        String key = "optRepeatSeckillSet:" + seckillId;
+        return key;
+    }
+
+    /***
+     * 判断用户是否已经进行了秒杀
+     * @param seckillId 秒杀商品id
+     * @param phone 用户账号
+     * @return
+     */
+    public Boolean getUserSeckillState(long seckillId, long phone){
+        try{
+            Jedis jedis = jedisPool.getResource();
+            try{
+                String key = calRepeatSeckillKey(seckillId);
+                boolean result = jedis.sismember(key, String.valueOf(phone));
+                return result;
+            }finally {
+                jedis.close();
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /***
+     * 添加参与秒杀的用户到Redis的Set中
+     * @param seckillId
+     * @param phone
+     * @return 已经存在了，返回 0， 否则返回 1
+     */
+    public Long addSeckillUser(long seckillId, long phone){
+        try{
+            Jedis jedis = jedisPool.getResource();
+            try{
+                String key = calRepeatSeckillKey(seckillId);
+                long result = jedis.sadd(key, String.valueOf(phone));
+                return result;
+            }finally {
+                jedis.close();
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /****
+     * 到从Redis的Set中删除对应的秒杀用户
+     * @param seckillId
+     * @param phone
+     * @return  向set中 添加记录，如果已经存在，返回0 否则返回1
+     */
+    public Long delSeckillUser(long seckillId, long phone){
+        try{
+            Jedis jedis = jedisPool.getResource();
+            try{
+                String key = calRepeatSeckillKey(seckillId);
+                long result = jedis.srem(key, String.valueOf(phone));
+                return result;
+            }finally {
+                jedis.close();
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
 }

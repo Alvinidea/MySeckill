@@ -34,6 +34,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
     @Autowired
     private SeckillDao seckillDao;
 
+    @Autowired
     private SuccessKilledDao successKilledDao;
 
     /**
@@ -73,9 +74,95 @@ public class OptSeckillServiceImpl implements OptSeckillService {
         String md5 = Md5Utils.getMD5(seckillId);
         return new Exposer(true, md5, seckillId);
     }
-
     @Override
     public SeckillExecution executeSeckill(long seckillId, long userPhone, String md5)
+            throws SeckillException, RepeatKillException, SeckillCloseException {
+        if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
+            throw new SeckillException("秒杀路径错误！");
+        }
+        try{
+            // TODO 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
+            Long inventory = redisDao.getInventory(seckillId);
+            if(inventory == null){
+                // 1.1 Redis中不存在对应商品，加锁 + LOCK
+                String ret = redisDao.setSeckillLock(seckillId, userPhone);
+                if( ! "OK".equals(ret)){
+                    // 1.1.1 未获取到锁，抛出异常
+                    throw new SeckillException("抢锁失败！");
+                }
+                // 1.1.2 加锁成功
+                Seckill seckill = seckillDao.queryById(seckillId);
+                if(seckill == null) {
+                    // 1.1.2.1 DB中不存在
+                    throw new SeckillException("该商品不属于秒杀商品");
+                }else{
+                    // 1.1.2.2 DB中存在该数据
+                    redisDao.setInventory(seckill.getSeckillId(), seckill.getNumber()); // 重新更新放入
+                    // 释放锁 - LOCK： ret_release == 1 成功， == 0 已经释放锁
+                    Long ret_release = redisDao.releaseSeckillLock(seckillId, userPhone);
+
+                }
+            }
+            // TODO 2. 判断秒杀时间是否在范围内（好像没什么必要）
+            /*
+                Date startTime = seckill.getStartTime();
+                Date endTime = seckill.getEndTime();
+                Date nowTime = new Date();
+                if(nowTime.getTime() < startTime.getTime() || nowTime.getTime() > endTime.getTime()) {
+                    throw new SeckillException("该商品不属于秒杀商品");
+                }
+            */
+            // TODO 3. 判断是否重复购买 ：使用Redis的Set来判断，单机情况下JVM的HashSet也可以
+            boolean isExist = redisDao.getUserSeckillState(seckillId, userPhone);
+            if(isExist){ // 已经存在则抛出异常
+                throw new RepeatKillException("重复秒杀");
+            }
+            // TODO 4. 减库存操作： 4.1 到 4.2 的过程不是原子操作，可能导致潜在的超卖问题
+            Long val = redisDao.getInventory(seckillId);            // 4.1 获取当前库存
+            if(val <= 0){
+                throw new RepeatKillException("秒杀商品结束了");
+            }
+            Long updateVal = redisDao.decrInventory(seckillId);     // 4.2 Redis 减库存
+            Long userSeckillState = redisDao.addSeckillUser(seckillId, userPhone);  // 将秒杀用户添加到Redis中，防止重复秒杀
+
+            int updateNum = seckillDao.reduceNumber(seckillId, new Date()); // TODO DB减库存(秒杀阶段进行有点不合适)
+            int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
+
+            if (insertCount <= 0 || updateNum <= 0) { //seckillId-userPhone唯一
+                updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复缓存的数据
+                userSeckillState = redisDao.delSeckillUser(seckillId, userPhone);
+                if(insertCount <= 0){ //重复秒杀（是DB级别的判断）
+                    throw new RepeatKillException("重复秒杀");
+                }else if (updateNum <= 0) { //记录更新失败，秒杀失败
+                    throw new SeckillCloseException("超卖 Or 秒杀关闭!!!");
+                }
+            }
+            return new SeckillExecution( seckillId
+                    , SeckillStateEnum.SUCCESS
+                    , new SuccessKilled()); // TODO 秒杀记录未处理操作
+        }catch (SeckillCloseException | RepeatKillException e1){
+            logger.error(e1.getMessage(), e1);
+            throw e1;
+        } catch (SeckillException e3){
+            logger.error(e3.getMessage(), e3);
+            throw e3;
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+            throw new SeckillException("Seckill inner error " + e.getMessage());
+        }
+    }
+
+    /***
+     * executeSeckill 方法的旧版本 Version1
+     * @param seckillId
+     * @param userPhone
+     * @param md5
+     * @return
+     * @throws SeckillException
+     * @throws RepeatKillException
+     * @throws SeckillCloseException
+     */
+    public SeckillExecution executeSeckill_Version1(long seckillId, long userPhone, String md5)
             throws SeckillException, RepeatKillException, SeckillCloseException {
         if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
             throw new SeckillException("秒杀路径错误！");
@@ -112,7 +199,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
                 throw new SeckillException("该商品不属于秒杀商品");
             }
             */
-            // TODO 3. 判断是否重复购买 （需完善）
+            // TODO 3. 判断是否重复购买 （需完善） ，当前是 DB 级别的判断
             /*
                 int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
                 if (insertCount <= 0) { //seckillId-userPhone唯一
