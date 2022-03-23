@@ -176,6 +176,11 @@
       <artifactId>rocketmq-client</artifactId>
       <version>5.0.0-PREVIEW</version>
     </dependency>
+    <dependency>
+      <groupId>org.luaj</groupId>
+      <artifactId>luaj-jse</artifactId>
+      <version>3.0.1</version>
+    </dependency>
   </dependencies>
 
 

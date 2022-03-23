@@ -74,8 +74,106 @@ public class OptSeckillServiceImpl implements OptSeckillService {
         String md5 = Md5Utils.getMD5(seckillId);
         return new Exposer(true, md5, seckillId);
     }
+
+    /***
+     * executeSeckill 方法的旧版本 current Version
+     * lua + redis版本
+     * @param seckillId
+     * @param userPhone
+     * @param md5
+     * @return
+     * @throws SeckillException
+     * @throws RepeatKillException
+     * @throws SeckillCloseException
+     */
     @Override
     public SeckillExecution executeSeckill(long seckillId, long userPhone, String md5)
+            throws SeckillException, RepeatKillException, SeckillCloseException {
+        if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
+            throw new SeckillException("秒杀路径错误！");
+        }
+        try{
+            // TODO 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
+            boolean isExist = redisDao.existsInventoryKey(seckillId);
+            if(!isExist){
+                // 1.1 Redis中不存在对应商品，加锁 + LOCK
+                String ret = redisDao.setSeckillLock(seckillId, userPhone);
+                if( ! "OK".equals(ret)){
+                    // 1.1.1 未获取到锁，抛出异常
+                    throw new SeckillException("抢锁失败！");
+                }
+                // 1.1.2 加锁成功
+                Seckill seckill = seckillDao.queryById(seckillId);
+                if(seckill == null) {
+                    // 1.1.2.1 DB中不存在
+                    throw new SeckillException("该商品不属于秒杀商品");
+                }else{
+                    // 1.1.2.2 DB中存在该数据
+                    redisDao.setInventory(seckill.getSeckillId(), seckill.getNumber()); // 重新更新放入
+                    // 释放锁 - LOCK： ret_release == 1 成功， == 0 已经释放锁
+                    Long ret_release = redisDao.releaseSeckillLock(seckillId, userPhone);
+
+                }
+            }
+            // TODO 2. 判断秒杀时间是否在范围内（好像没什么必要）
+            /*
+                Date startTime = seckill.getStartTime();
+                Date endTime = seckill.getEndTime();
+                Date nowTime = new Date();
+                if(nowTime.getTime() < startTime.getTime() || nowTime.getTime() > endTime.getTime()) {
+                    throw new SeckillException("该商品不属于秒杀商品");
+                }
+            */
+            // TODO 3. 判断是否重复购买 ：使用Redis的Set来判断，单机情况下JVM的HashSet也可以
+            isExist = redisDao.getUserSeckillState(seckillId, userPhone);
+            if(isExist){ // 已经存在则抛出异常
+                throw new RepeatKillException("重复秒杀");
+            }
+            // TODO 4. 减库存操作： lua 版本解决了潜在的超卖问题
+            long result = redisDao.callLuaScriptToDecrInventory(seckillId, userPhone);
+            // -------------------------------------------------------------------------------------------------------
+            // ------------------ 数据库层面的减库存操作  TODO DB减库存(秒杀阶段不合适)
+            // -------------------------------------------------------------------------------------------------------
+            int updateNum = seckillDao.reduceNumber(seckillId, new Date()); //
+            if (updateNum <= 0) { //记录更新失败，秒杀失败
+                Long updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复缓存的数据
+                throw new SeckillCloseException("超卖 Or 秒杀关闭!!!");
+            }
+            int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
+            if (insertCount <= 0) { //seckillId-userPhone唯一 //重复秒杀（是DB级别的判断）
+                Long updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复Redis缓存的数据
+                Long userSeckillState = redisDao.delSeckillUser(seckillId, userPhone);
+                throw new RepeatKillException("重复秒杀");
+            }
+            // -------------------------------------------------------------------------------------------------------
+            return new SeckillExecution( seckillId
+                    , SeckillStateEnum.SUCCESS
+                    , new SuccessKilled()); // TODO 秒杀记录未处理操作
+        }catch (SeckillCloseException | RepeatKillException e1){
+            logger.error(e1.getMessage(), e1);
+            throw e1;
+        } catch (SeckillException e3){
+            logger.error(e3.getMessage(), e3);
+            throw e3;
+        }catch (Exception e){
+            logger.error(e.getMessage(), e);
+            throw new SeckillException("Seckill inner error " + e.getMessage());
+        }
+    }
+
+
+    /***
+     * executeSeckill 方法的旧版本 Version2
+     * Redis版本
+     * @param seckillId
+     * @param userPhone
+     * @param md5
+     * @return
+     * @throws SeckillException
+     * @throws RepeatKillException
+     * @throws SeckillCloseException
+     */
+    public SeckillExecution executeSeckill_Version2(long seckillId, long userPhone, String md5)
             throws SeckillException, RepeatKillException, SeckillCloseException {
         if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
             throw new SeckillException("秒杀路径错误！");
@@ -125,18 +223,21 @@ public class OptSeckillServiceImpl implements OptSeckillService {
             Long updateVal = redisDao.decrInventory(seckillId);     // 4.2 Redis 减库存
             Long userSeckillState = redisDao.addSeckillUser(seckillId, userPhone);  // 将秒杀用户添加到Redis中，防止重复秒杀
 
+            // -------------------------------------------------------------------------------------------------------
+            // DB减库存
+            // -------------------------------------------------------------------------------------------------------
             int updateNum = seckillDao.reduceNumber(seckillId, new Date()); // TODO DB减库存(秒杀阶段进行有点不合适)
-            int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
-
-            if (insertCount <= 0 || updateNum <= 0) { //seckillId-userPhone唯一
+            if (updateNum <= 0) { //记录更新失败，秒杀失败
                 updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复缓存的数据
-                userSeckillState = redisDao.delSeckillUser(seckillId, userPhone);
-                if(insertCount <= 0){ //重复秒杀（是DB级别的判断）
-                    throw new RepeatKillException("重复秒杀");
-                }else if (updateNum <= 0) { //记录更新失败，秒杀失败
-                    throw new SeckillCloseException("超卖 Or 秒杀关闭!!!");
-                }
+                throw new SeckillCloseException("超卖 Or 秒杀关闭!!!");
             }
+            int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
+            if (insertCount <= 0) { //seckillId-userPhone唯一 //重复秒杀（是DB级别的判断）
+                updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复Redis缓存的数据
+                userSeckillState = redisDao.delSeckillUser(seckillId, userPhone);
+                throw new RepeatKillException("重复秒杀");
+            }
+            // -------------------------------------------------------------------------------------------------------
             return new SeckillExecution( seckillId
                     , SeckillStateEnum.SUCCESS
                     , new SuccessKilled()); // TODO 秒杀记录未处理操作
@@ -154,6 +255,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
 
     /***
      * executeSeckill 方法的旧版本 Version1
+     * DB版本
      * @param seckillId
      * @param userPhone
      * @param md5
