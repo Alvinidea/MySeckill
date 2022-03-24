@@ -204,13 +204,10 @@ public class OptSeckillServiceImpl implements OptSeckillService {
             if(result < 0){             // note：不加以判断则会出现DB、缓存不一致问题
                 throw new SeckillException("商品卖光光了！");
             }
-            // -------------------------------------------------------------------------------------------------------
-            // ------------------ 数据库层面的减库存操作  TODO DB减库存(秒杀阶段不合适) 需更新
-            // -------------------------------------------------------------------------------------------------------
+            //  TODO DB减库存(秒杀阶段不合适) 需更新
             int updateNum = seckillDao.reduceNumber(seckillId, new Date()); //
             if (updateNum <= 0) { //记录更新失败，秒杀失败
                 Long updateVal = redisDao.incrInventory(seckillId);  // DB减库存未成功，则需要恢复缓存的数据
-                System.out.println("updateNum <= 0) { //记录更新失败，秒杀失败 ==================sadasdas=====================");
                 throw new SeckillCloseException("超卖 Or 秒杀关闭!!!");
             }
 
@@ -247,7 +244,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
             throw new SeckillException("秒杀路径错误！");
         }
         try{
-            // TODO 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
+            // Q 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
             boolean isExist = redisDao.existsInventoryKey(seckillId);
             if(!isExist){
                 // 1.1 Redis中不存在对应商品，加锁 + LOCK
@@ -269,17 +266,17 @@ public class OptSeckillServiceImpl implements OptSeckillService {
 
                 }
             }
-            // TODO 2. 判断秒杀时间是否在范围内（好像没什么必要）
-            // TODO 3. 判断是否重复购买 ：使用Redis的Set来判断，单机情况下JVM的HashSet也可以
+            // Q 2. 判断秒杀时间是否在范围内（好像没什么必要）
+            // Q 3. 判断是否重复购买 ：使用Redis的Set来判断，单机情况下JVM的HashSet也可以
             isExist = redisDao.getUserSeckillState(seckillId, userPhone);
             if(isExist){ // 已经存在则抛出异常
                 throw new RepeatKillException("重复秒杀");
             }
-            // TODO 4. 减库存操作： lua 版本解决了潜在的超卖问题  result 不加以判断则会出现DB、缓存不一致问题
+            // Q 4. 减库存操作： lua 版本解决了潜在的超卖问题  result 不加以判断则会出现DB、缓存不一致问题
             long result = redisDao.callLuaScriptToDecrInventory(seckillId, userPhone);
 
             // -------------------------------------------------------------------------------------------------------
-            // ------------------ 数据库层面的减库存操作  TODO DB减库存(秒杀阶段不合适)
+            // ------------------ 数据库层面的减库存操作  Q DB减库存(秒杀阶段不合适)
             // -------------------------------------------------------------------------------------------------------
             int updateNum = seckillDao.reduceNumber(seckillId, new Date()); //
             if (updateNum <= 0) { //记录更新失败，秒杀失败
@@ -295,7 +292,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
             // -------------------------------------------------------------------------------------------------------
             return new SeckillExecution( seckillId
                     , SeckillStateEnum.SUCCESS
-                    , new SuccessKilled()); // TODO 秒杀记录未处理操作
+                    , new SuccessKilled()); // Q 秒杀记录未处理操作
         }catch (SeckillCloseException | RepeatKillException e1){
             logger.error(e1.getMessage(), e1);
             throw e1;

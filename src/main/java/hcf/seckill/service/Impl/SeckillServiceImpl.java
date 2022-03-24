@@ -117,7 +117,7 @@ public class SeckillServiceImpl implements SeckillService {
             int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
             if (insertCount <= 0) { //seckillId-userPhone唯一
                 //重复秒杀（是DB级别的判断）
-                throw new RepeatKillException("hcf.seckill repeat"); // TODO 如果失败了还是会减库存 ？？？
+                throw new RepeatKillException("hcf.seckill repeat"); // QTODO 如果失败了还是会减库存 ？？？
             } else {
                 // 减库存,热点商品竞争
                 int updateNum = seckillDao.reduceNumber(seckillId, nowTime);
@@ -213,7 +213,7 @@ public class SeckillServiceImpl implements SeckillService {
                 int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
                 if (insertCount <= 0) { //seckillId-userPhone唯一
                     //重复秒杀
-                    throw new RepeatKillException("hcf.seckill repeat"); // TODO 如果失败了还是会减库存 ？？？
+                    throw new RepeatKillException("hcf.seckill repeat"); // ODO 如果失败了还是会减库存 ？？？
                 } else {
                     //秒杀成功
                     SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
