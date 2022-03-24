@@ -111,7 +111,7 @@ public class OptSeckillController extends BaseController{
             result = new SeckillResult<SeckillExecution>(true, execution);
         } catch (SeckillException e){
             SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.INNER_ERROR);
-            result = new SeckillResult<SeckillExecution>(true, execution);
+            result = new SeckillResult<SeckillExecution>(true, execution, e.getMessage());
         }
         catch (Exception e){
             SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.INNER_ERROR);
@@ -119,6 +119,48 @@ public class OptSeckillController extends BaseController{
         }
         return result;
     }
+
+    /**
+     * executeSeckill 方法的Jmeter测试版本，
+     *      * 便于测试，取消了重复秒杀的判断，用户秒杀信息在 success_killed的存储
+     * @param seckillId
+     * @param md5
+     * @param phone
+     * @return
+     */
+    @RequestMapping(value = "/{seckillId}/{md5}/{killPhone}/execution"
+            ,method = RequestMethod.POST
+            ,produces = {"application/json;charset=utf-8"})
+    @ResponseBody
+    public SeckillResult<SeckillExecution> testExecute(
+            @PathVariable("seckillId") Long seckillId
+            , @PathVariable("md5") String md5
+            , @PathVariable("killPhone") Long phone){
+        if (phone == null) {
+            return new SeckillResult<SeckillExecution>(false, "未登录");
+        }
+        SeckillResult<SeckillExecution> result;
+        try{
+            SeckillExecution execution = optSeckillService.executeSeckillForJmeter(seckillId, phone, md5);
+            result = new SeckillResult<SeckillExecution>(true, execution);
+        }catch(RepeatKillException e){
+            SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.REPEAT_KILL);
+            result = new SeckillResult<SeckillExecution>(true, execution);
+        }catch(SeckillCloseException e){
+            SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.END);
+            result = new SeckillResult<SeckillExecution>(true, execution);
+        } catch (SeckillException e){
+            logger.info(e.getMessage());
+            SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.INNER_ERROR);
+            result = new SeckillResult<SeckillExecution>(true, execution, e.getMessage());
+        }
+        catch (Exception e){
+            SeckillExecution execution = new SeckillExecution(seckillId, SeckillStateEnum.INNER_ERROR);
+            result = new SeckillResult<SeckillExecution>(true, execution);
+        }
+        return result;
+    }
+
 
     @RequestMapping(value = "/time/now", method = RequestMethod.GET)
     @ResponseBody

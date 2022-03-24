@@ -15,10 +15,10 @@
         <property name="user" value="${uname}"/>
         <property name="password" value="${password}"/>
 
-        <property name="maxPoolSize" value="30"/>
+        <property name="maxPoolSize" value="40"/>
         <property name="minPoolSize" value="10"/>
         <property name="autoCommitOnClose" value="false"/>
-        <property name="checkoutTimeout" value="1000"/>
+        <property name="checkoutTimeout" value="3000"/>
         <!-- 连接获取失败， 重试获取两次连接-->
         <property name="acquireRetryAttempts" value="2"/>
     </bean>

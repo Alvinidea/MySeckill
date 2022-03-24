@@ -13,9 +13,16 @@ public class SeckillResult<T> {
 
     private String error;
 
+
     public SeckillResult(boolean success, T data) {
         this.success = success;
         this.data = data;
+    }
+
+    public SeckillResult(boolean success, T data, String error) {
+        this.success = success;
+        this.data = data;
+        this.error = error;
     }
 
     public SeckillResult(boolean success, String error) {

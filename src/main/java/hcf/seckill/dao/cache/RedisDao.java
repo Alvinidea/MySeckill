@@ -382,17 +382,19 @@ public class RedisDao {
         StringBuilder luasb = new StringBuilder();
         luasb.append("if (redis.call('exists', KEYS[1]) == 1) then"); // 查询键是否存在
         luasb.append("    local stock = tonumber(redis.call('get', KEYS[1]));"); // tonumber( * ) -> 转化为数字 // 获取值
+        /*
         luasb.append("    if (stock == -1) then");
         luasb.append("        return 1;");
         luasb.append("    end;");
+        */
         luasb.append("    if (stock > 0) then");
         luasb.append("        local stock = tonumber(redis.call('incrby', KEYS[1], -1));"); // 4.2 Redis 减库存
         luasb.append("        redis.call('sadd', KEYS[2], ARGV[1]);");      // 将秒杀用户添加到Redis中，防止重复秒杀
         luasb.append("        return stock;");
         luasb.append("    end;");
-        luasb.append("    return 0;");
+        luasb.append("    return -1;");     // 返回-1 ： stock <= 0 商品卖光了
         luasb.append("end;");
-        luasb.append("return -1;");
+        luasb.append("return -2;");         // 返回-2 ： KEYS[1] 不存在
         return luasb.toString();
     }
 

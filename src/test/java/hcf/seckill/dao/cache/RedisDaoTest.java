@@ -77,7 +77,8 @@ public class RedisDaoTest {
             }
         }
         long result = redisDao.callLuaScriptToDecrInventory(seckillId, userPhone);
-        boolean state = redisDao.getUserSeckillState(seckillId, userPhone);
-        System.out.println("lua执行结果 = "+ result+ "     state = "+  state);
+        // boolean state = redisDao.getUserSeckillState(seckillId, userPhone);
+        // System.out.println("lua执行结果 = "+ result+ "     state = "+  state);
+        System.out.println(result);
     }
 }
