@@ -181,6 +181,26 @@
       <artifactId>luaj-jse</artifactId>
       <version>3.0.1</version>
     </dependency>
+
+    <!-- 令牌桶算法 -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>27.1-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>failureaccess</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+
+    <!-- Shiro 相关配置 -->
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-all</artifactId>
+      <version>1.9.0</version>
+      <type>pom</type>
+    </dependency>
   </dependencies>
 
 
