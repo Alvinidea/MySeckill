@@ -1,5 +1,7 @@
 package hcf.exp.rocketMQ;
 
+
+
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -31,7 +33,7 @@ public class Consumer {
     public static void main(String[] args) throws InterruptedException, MQClientException {
 
         // 实例化消费者， Push : MQ主动推送信息
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("HCF");
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("HCFGroup");
 
         // 设置NameServer的地址
         consumer.setNamesrvAddr("10.16.65.76:9876");
@@ -39,7 +41,7 @@ public class Consumer {
         // consumer.setMessageModel(MessageModel.BROADCASTING);
 
         // 订阅一个或者多个Topic，以及Tag来过滤需要消费的消息
-        consumer.subscribe("HCF", "*");
+        consumer.subscribe("MyTopic", "*");
         // 注册回调实现类来处理从broker拉取回来的消息
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override

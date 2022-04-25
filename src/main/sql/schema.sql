@@ -61,3 +61,7 @@ values
 insert into seckill(name, number, start_time, end_time)
 values
 ('1000秒杀', 1000, '2022-3-23 00:00:00', '2023-3-18 00:00:00');
+
+insert into seckill(name, number, start_time, end_time)
+values
+('test seckill', 1000, '2022-4-25 00:00:00', '2033-3-18 00:00:00');

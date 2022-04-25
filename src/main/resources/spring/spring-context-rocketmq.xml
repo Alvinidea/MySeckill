@@ -34,4 +34,9 @@
         <property name="namesrvAddr" value="${rocketmq.namesrvAddr}"/>
     </bean>
 
+    <!-- Tips：
+      现在生产者 与 消费者配置在同一主机上，是为了测试方便，实际应用一般会在不同主机甚至是集群上
+    -->
+
+
 </beans>

@@ -5,5 +5,5 @@ package hcf.order.service;
  * @date 2022/4/24 13:50
  */
 public interface OrderService {
-    public void sendMsg();
+    public void consumeSeckillMsg(long seckillId, long userPhone);
 }

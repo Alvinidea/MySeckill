@@ -10,6 +10,9 @@ import java.io.UnsupportedEncodingException;
 
 
 /**
+ * 只是在本项目实现中，将 MqProducer，MqConsumerListener 放在了一起而已
+ * 秒杀系统 - 生产消息
+ * 订单系统 - 消费消息
  * @author hechaofan
  * @date 2022/4/24 15:09
  */
@@ -18,7 +21,6 @@ public class MqProducer {
     private static DefaultMQProducer defaultMQProducer;
     private String producerGroup;
     private String namesrvAddr;
-
 
     public String getProducerGroup() {
         return producerGroup;
@@ -55,6 +57,7 @@ public class MqProducer {
     public DefaultMQProducer getDefaultMQProducer() {
         return defaultMQProducer;
     }
+
     /**
      * rocketmq发送消息方法
      *

@@ -48,6 +48,9 @@ public class TestController {
     // https://blog.csdn.net/u011291072/article/details/107943586 令牌桶
 
 
+    /*
+    * RocketMQ 的测试
+    * */
     @Autowired
     private MqProducer mqProducer;
 
