@@ -38,6 +38,7 @@ public class UserRealm extends AuthorizingRealm {
         // 设置当前用户的权限
         // info.addStringPermission(currentUser.getPerms());
         // 本应该使用用户具有的权限，但是我的设计中最开始未考虑 权限，所以这儿直接写一个字符串 "user:all" 作为权限
+        // getPermission
         info.addStringPermission("user:all");
 
         return info;

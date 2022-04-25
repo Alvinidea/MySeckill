@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd" >
+
+    <description>RocketMQ Config</description>
+
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:rocketmq.properties"/>
+    <!--
+        consumer.registerMessageListener(new MessageListenerConcurrently()
+        { ... })
+    -->
+    <bean id="messageListeners" class="hcf.order.rocketMQ.MqConsumerListener"/>
+
+    <bean id="MqConsumer" class="com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer"
+          init-method="start" destroy-method="shutdown">
+        <!-- 配置时候注意启动项 -->
+        <property name="consumerGroup" value="${rocketmq.consumer.group}"/>
+        <property name="namesrvAddr" value="${rocketmq.namesrvAddr}"/>
+        <property name="messageListener" ref="messageListeners"/>
+        <property name="subscription">
+            <map>
+                <entry key="${rocketmq.topic}" value="${rocketmq.tag}" />
+            </map>
+        </property>
+    </bean>
+
+    <!--//生产者配置-->
+    <bean id="MqProducer" class="hcf.order.rocketMQ.MqProducer"
+          init-method="init" destroy-method="destroy">
+        <property name="producerGroup" value="${rocketmq.producer.group}"/>
+        <property name="namesrvAddr" value="${rocketmq.namesrvAddr}"/>
+    </bean>
+
+</beans>

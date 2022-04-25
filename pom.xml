@@ -170,11 +170,16 @@
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.1</version>
     </dependency>
-    <!--配置消息队列中间件 依赖包-->
+    <!--配置消息队列中间件 依赖包
     <dependency>
       <groupId>org.apache.rocketmq</groupId>
       <artifactId>rocketmq-client</artifactId>
       <version>5.0.0-PREVIEW</version>
+    </dependency> -->
+    <dependency>
+      <groupId>com.alibaba.rocketmq</groupId>
+      <artifactId>rocketmq-client</artifactId>
+      <version>3.6.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.luaj</groupId>
@@ -240,5 +245,15 @@
         </plugin>
       </plugins>
     </pluginManagement>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>8</source>
+                  <target>8</target>
+              </configuration>
+          </plugin>
+      </plugins>
   </build>
 </project>

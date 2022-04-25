@@ -11,39 +11,27 @@ import com.alibaba.rocketmq.remoting.common.RemotingHelper;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-
-/*
-
-<!--配置消息队列中间件 依赖包-->
-<dependency>
-    <groupId>org.apache.rocketmq</groupId>
-    <artifactId>rocketmq-client</artifactId>
-    <version>5.0.0-PREVIEW</version>
-</dependency>
-
-*/
-
 /**
  * @author hechaofan
  * @date 2022/3/22 18:43
  */
-public class Consumer {
+public class ConsumerTest {
     public static void main(String[] args) throws InterruptedException, MQClientException {
 
-        // 实例化消费者， Push : MQ主动推送信息
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("HCF");
+        // 实例化消费者 : DefaultMQPushConsumer 的默认消费方式，集群消费。 Push : MQ主动推送信息
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("WP");
 
         // 设置NameServer的地址
         consumer.setNamesrvAddr("10.16.65.76:9876");
-        // 设置广播消费策略，（默认是 集群消费  MessageModel.BROADCASTING）
-        // consumer.setMessageModel(MessageModel.BROADCASTING);
-
+        consumer.start();
         // 订阅一个或者多个Topic，以及Tag来过滤需要消费的消息
         consumer.subscribe("HCF", "*");
         // 注册回调实现类来处理从broker拉取回来的消息
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override
-            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+            public ConsumeConcurrentlyStatus consumeMessage(
+                    List<MessageExt> msgs
+                    , ConsumeConcurrentlyContext context) {
                 int i = 1;
                 for (MessageExt msg : msgs) {
                     String msgStr = null;
@@ -58,7 +46,7 @@ public class Consumer {
                             , msgStr);
                     i++;
                 }
-                // 标记该消息已经被成功消费
+                       // 标记该消息已经被成功消费
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }
         });

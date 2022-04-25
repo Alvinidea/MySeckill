@@ -1,11 +1,19 @@
 package hcf.seckill.controller;
 
+import com.alibaba.rocketmq.shade.com.alibaba.fastjson.JSON;
 import com.google.common.util.concurrent.RateLimiter;
+import hcf.order.rocketMQ.MqProducer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +33,8 @@ public class TestController {
     private RateLimiter rateLimiter = RateLimiter.create(10);
     @RequestMapping(value = "/sale")
     @ResponseBody
-    public String testRateLimiter(Integer id){
+    public String testRateLimiter(HttpServletResponse response, HttpServletRequest request, HttpSession session, Integer id){
+
 
         System.out.println();
         if(!rateLimiter.tryAcquire(5, TimeUnit.SECONDS)){
@@ -37,4 +46,25 @@ public class TestController {
         return "test";
     }
     // https://blog.csdn.net/u011291072/article/details/107943586 令牌桶
+
+
+    @Autowired
+    private MqProducer mqProducer;
+
+    @ResponseBody
+    @RequestMapping(value = "/testRocketMQ")
+    public String testRocketMQ(){
+        String consumerStr = "666";
+        //发送消息
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("name", "hcf");
+        msg.put("phone", "18400001111");
+        MqProducer.sendMsgIntime("OrderTopic",
+                "order",
+                "",
+                JSON.toJSONString(msg));
+        return "消费信息:" +consumerStr;
+
+    }
+
 }
