@@ -26,7 +26,7 @@ public class SyncProducer {
             // 创建消息，并指定Topic，Tag和消息体
             Message msg = new Message(
                     "MyTopic" /* Topic */,
-                    "TagA" /* Tag */,
+                    "Love" /* Tag */,
                     ("DDDDDDDDD ：" + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
             );
             // 发送消息到一个Broker

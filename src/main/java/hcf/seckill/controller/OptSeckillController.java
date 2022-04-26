@@ -44,7 +44,7 @@ public class OptSeckillController extends BaseController{
         //list.jsp + model = ModelAndView
         List<Seckill> list = seckillService.getSeckillList();
         model.addAttribute("list", list);
-        return "optList";  //等同于 WEB-INF/jsp/list.jsp
+        return "jsp/optList";  //等同于 WEB-INF/jsp/list.jsp
     }
 
     @RequestMapping(value="/{seckillId}/detail", method = RequestMethod.GET)
@@ -59,7 +59,22 @@ public class OptSeckillController extends BaseController{
             return "forward:/optSeckill/list";
         }
         model.addAttribute("seckill", seckill);
-        return "optDetail";
+        return "jsp/optDetail";
+    }
+
+    @RequestMapping(value="/{seckillId}/sDetail", method = RequestMethod.GET)
+    public String sDetail(
+            @PathVariable("seckillId") Long seckillId
+            , Model model){
+        if(seckillId == null){
+            return "redirect:/optSeckill/list";
+        }
+        Seckill seckill = seckillService.getById(seckillId);
+        if(seckill == null){
+            return "forward:/optSeckill/list";
+        }
+        model.addAttribute("seckill", seckill);
+        return "html/sDetail";
     }
     /***
      * 获取秒杀接口

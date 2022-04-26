@@ -27,11 +27,55 @@
     <mvc:resources mapping="/img/**" location="/WEB-INF/static/img/"/>
 
     <!--3、配置jsp 显示ViewResolver-->
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<!--    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
         <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>
-    </bean>
+    </bean>-->
+
+
     <!--4、扫描web相关的bean-->
     <context:component-scan base-package="hcf.seckill.controller"/>
+
+
+    <!-- 5. 引入thymeleaf-->
+    <bean id="templateResolver" class="org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/static/"/>
+        <property name="suffix" value=".html"/>
+        <property name="templateMode" value="HTML"/>
+        <property name="cacheable" value="false"/>
+    </bean>
+
+    <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver"/>
+    </bean>
+
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine"/>
+        <property name="characterEncoding" value="utf-8"/>
+    </bean>
+
+    <!--6、配置jsp, thymeleaf 显示ViewResolver
+    http://t.csdn.cn/QAhUq
+        ContentNegotiatingViewResolver可以“智能”地为我们选择视图解析器，所以ContentNegotiatingViewResolver中可以囊括多个视图解析器
+    -->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+                    <property name="characterEncoding" value="utf-8"/>
+                    <property name="templateEngine" ref="templateEngine"/>
+                    <property name="viewNames" value="html/*"/>
+                    <property name="order" value="2"/>
+                </bean>
+
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="prefix" value="/WEB-INF/"/>
+                    <property name="suffix" value=".jsp"/>
+                    <property name="viewNames" value="jsp/*"/>
+                    <property name="order" value="1"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
 </beans>

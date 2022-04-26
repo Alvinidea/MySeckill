@@ -7,10 +7,14 @@ import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import com.alibaba.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import com.alibaba.rocketmq.client.exception.MQClientException;
+import com.alibaba.rocketmq.common.UtilAll;
+import com.alibaba.rocketmq.common.consumer.ConsumeFromWhere;
 import com.alibaba.rocketmq.common.message.MessageExt;
 import com.alibaba.rocketmq.remoting.common.RemotingHelper;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
@@ -35,11 +39,12 @@ public class ConsumerTest {
         // 实例化消费者， Push : MQ主动推送信息
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("HCFGroup");
 
-        // 设置NameServer的地址
+        // 设置NameServer的地址  http://10.16.65.76:9999/
         consumer.setNamesrvAddr("10.16.65.76:9876");
         // 设置广播消费策略，（默认是 集群消费  MessageModel.BROADCASTING）
         // consumer.setMessageModel(MessageModel.BROADCASTING);
-
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
+        // consumer.setConsumeTimestamp(UtilAll.timeMillisToHumanString3(System.currentTimeMillis() - 1800000L));
         // 订阅一个或者多个Topic，以及Tag来过滤需要消费的消息
         consumer.subscribe("MyTopic", "*");
         // 注册回调实现类来处理从broker拉取回来的消息
@@ -54,10 +59,13 @@ public class ConsumerTest {
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                    System.out.printf("%d : %s Receive New Messages: %s %n"
+                    SimpleDateFormat sd = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+                    Date date = new Date(msg.getStoreTimestamp());
+                    System.out.printf("%d : %s Receive New Messages: %s | time = %s %n"
                             , i
                             , Thread.currentThread().getName()
-                            , msgStr);
+                            , msgStr
+                            ,sd.format(date));
                     i++;
                 }
                 // 标记该消息已经被成功消费
