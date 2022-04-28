@@ -210,3 +210,53 @@ Kafka
 https://gitee.com/apache/rocketmq/tree/master/docs/cn
 https://github.com/apache/rocketmq/tree/master/docs/cn
 https://rocketmq.apache.org/docs/quick-start/
+
+```
+├─.idea
+├─src
+│  ├─main
+│  │  ├─webapp
+│  │  │  ├─WEB-INF
+│  │  │  │  ├─jsp
+│  │  │  │  │  └─common
+│  │  │  │  └─static
+│  │  │  │      ├─js
+│  │  │  │      ├─img
+│  │  │  │      └─html
+│  │  │  └─resources
+│  │  │      └─js
+│  │  ├─java
+│  │  │  └─hcf
+│  │  │      ├─seckill
+│  │  │      │  ├─entity
+│  │  │      │  ├─exception
+│  │  │      │  ├─controller
+│  │  │      │  ├─dto
+│  │  │      │  ├─service
+│  │  │      │  │  └─Impl
+│  │  │      │  ├─dao
+│  │  │      │  │  └─cache
+│  │  │      │  ├─enums
+│  │  │      │  ├─Utils
+│  │  │      │  └─config
+│  │  │      ├─exp          // 做验证与实验的文件夹
+│  │  │      │  ├─rocketMQ
+│  │  │      │  └─lua
+│  │  │      └─order
+│  │  │          ├─service
+│  │  │          ├─dao
+│  │  │          └─rocketMQ
+│  │  ├─resources
+│  │  │  ├─mapper
+│  │  │  └─spring
+│  │  └─sql
+│  └─test
+│      ├─java
+│      │  └─hcf
+│      │      └─seckill
+│      │          ├─dao
+│      │          │  └─cache
+│      │          └─service
+│      └─resources
+└─target
+```

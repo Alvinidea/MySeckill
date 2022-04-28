@@ -207,6 +207,7 @@
       <type>pom</type>
     </dependency>
 
+    <!--thymeleaf模板引擎的使用 -->
     <dependency>
       <groupId>org.thymeleaf</groupId>
       <artifactId>thymeleaf</artifactId>
@@ -216,6 +217,15 @@
       <groupId>org.thymeleaf</groupId>
       <artifactId>thymeleaf-spring4</artifactId>
       <version>3.0.6.RELEASE</version>
+    </dependency>
+
+    <!--hcf.exp.zookeeper 分布式 -->
+
+    <!--原生的zookeeper不好用使用 zkclient-->
+    <dependency>
+      <groupId>com.101tec</groupId>
+      <artifactId>zkclient</artifactId>
+      <version>0.11</version>
     </dependency>
   </dependencies>
 

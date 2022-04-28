@@ -44,6 +44,7 @@
         <property name="suffix" value=".html"/>
         <property name="templateMode" value="HTML"/>
         <property name="cacheable" value="false"/>
+        <property name="characterEncoding" value="utf-8"/>
     </bean>
 
     <bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">
@@ -55,7 +56,7 @@
         <property name="characterEncoding" value="utf-8"/>
     </bean>
 
-    <!--6、配置jsp, thymeleaf 显示ViewResolver
+    <!--6、配置多模板引擎 ： jsp, thymeleaf 的 ViewResolver
     http://t.csdn.cn/QAhUq
         ContentNegotiatingViewResolver可以“智能”地为我们选择视图解析器，所以ContentNegotiatingViewResolver中可以囊括多个视图解析器
     -->
@@ -65,14 +66,14 @@
                 <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
                     <property name="characterEncoding" value="utf-8"/>
                     <property name="templateEngine" ref="templateEngine"/>
-                    <property name="viewNames" value="html/*"/>
+                    <property name="viewNames" value="html/*"/> <!--关键点-->
                     <property name="order" value="2"/>
                 </bean>
 
                 <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
                     <property name="prefix" value="/WEB-INF/"/>
                     <property name="suffix" value=".jsp"/>
-                    <property name="viewNames" value="jsp/*"/>
+                    <property name="viewNames" value="jsp/*"/>  <!--关键点-->
                     <property name="order" value="1"/>
                 </bean>
             </list>

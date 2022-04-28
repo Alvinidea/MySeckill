@@ -47,7 +47,7 @@ public class SeckillController extends BaseController{
         //list.jsp + model = ModelAndView
         List<Seckill> list = seckillService.getSeckillList();
         model.addAttribute("list", list);
-        return "list";  //等同于 WEB-INF/jsp/list.jsp
+        return "jsp/list";  //等同于 WEB-INF/jsp/list.jsp
     }
 
     @RequestMapping(value="/{seckillId}/detail", method = RequestMethod.GET)
@@ -55,14 +55,14 @@ public class SeckillController extends BaseController{
             @PathVariable("seckillId") Long seckillId
             , Model model){
         if(seckillId == null){
-            return "redirect:/hcf.seckill/list";
+            return "redirect:/seckill/list";
         }
         Seckill seckill = seckillService.getById(seckillId);
         if(seckill == null){
-            return "forward:/hcf.seckill/list";
+            return "forward:/seckill/list";
         }
         model.addAttribute("seckill", seckill);
-        return "detail";
+        return "jsp/detail";
     }
 
     //ajax json

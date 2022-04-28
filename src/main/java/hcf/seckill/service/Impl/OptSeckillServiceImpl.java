@@ -118,26 +118,42 @@ public class OptSeckillServiceImpl implements OptSeckillService {
         }
         try{
             // 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
+            boolean lessToSellFlag = false;      // 少卖的flag标签
             boolean isExist = redisDao.existsInventoryKey(seckillId);
             if(!isExist){
                 // 1.1 Redis中不存在对应商品，加锁 + LOCK
                 String ret = redisDao.setSeckillLock(seckillId, userPhone);
                 if( ! "OK".equals(ret)){
+                    /*
                     // 1.1.1 未获取到锁，抛出异常
-                    throw new SeckillException("抢锁失败！");
-                    // TODO 首次获取锁的过程中，可能1000个用户在抢锁，但是只有一个用户获取到，那么其他999个全部失败
+                    // throw new SeckillException("抢锁失败！");
+                    */
+                    int spinning=5;
+                    while(spinning > 0 && !"OK".equals(redisDao.existsInventoryKey(seckillId)) ){
+                        Thread.sleep(100);
+                        spinning--;
+                    }
+                    if(spinning <= 0 ){
+                        throw new SeckillException("抢锁失败！");
+                    }else if("OK".equals(redisDao.existsInventoryKey(seckillId))){
+                        lessToSellFlag = true;
+                    }
+                    // TODO 首次获取锁的过程中，可能1000个用户在抢锁，但是只有一个用户获取到，那么其他999个全部失败, 这种情况下可能导致少卖
+                    // 这种情况： 一共 10 个产品，1000人来抢，发现redis中没有数据 所以抢分布式锁，
+                    // 1000个就一个抢到了，999失败， ...，那就还有 9 个没卖出去
                 }
-                // 1.1.2 加锁成功
-                Seckill seckill = seckillDao.queryById(seckillId);
-                if(seckill == null) {
-                    // 1.1.2.1 DB中不存在
-                    throw new SeckillException("该商品不属于秒杀商品");
-                }else{
-                    // 1.1.2.2 DB中存在该数据
-                    redisDao.setInventory(seckill.getSeckillId(), seckill.getNumber()); // 重新更新放入
-                    // 释放锁 - LOCK： ret_release == 1 成功， == 0 已经释放锁
-                    Long ret_release = redisDao.releaseSeckillLock(seckillId, userPhone);
-
+                if(lessToSellFlag == false){
+                    // 1.1.2 加锁成功
+                    Seckill seckill = seckillDao.queryById(seckillId);
+                    if(seckill == null) {
+                        // 1.1.2.1 DB中不存在
+                        throw new SeckillException("该商品不属于秒杀商品");
+                    }else{
+                        // 1.1.2.2 DB中存在该数据
+                        redisDao.setInventory(seckill.getSeckillId(), seckill.getNumber()); // 重新更新放入
+                        // 释放锁 - LOCK： ret_release == 1 成功， == 0 已经释放锁
+                        Long ret_release = redisDao.releaseSeckillLock(seckillId, userPhone);
+                    }
                 }
             }
             // 2. 判断秒杀时间是否在范围内（好像没什么必要）
@@ -169,7 +185,6 @@ public class OptSeckillServiceImpl implements OptSeckillService {
             throw new SeckillException("Seckill inner error " + e.getMessage());
         }
     }
-
     /***
      * executeSeckill 方法的Jmeter测试版本，
      * 便于测试，取消了重复秒杀的判断，用户秒杀信息在 success_killed的存储
@@ -184,6 +199,85 @@ public class OptSeckillServiceImpl implements OptSeckillService {
      */
     @Override
     public SeckillExecution executeSeckillForJmeter(long seckillId, long userPhone, String md5)
+            throws SeckillException, RepeatKillException, SeckillCloseException {
+        if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
+            throw new SeckillException("秒杀路径错误！");
+        }
+        try{
+            boolean lessToSellFlag = false;      // 少卖的flag标签
+            // 1. 判断Redis中 对应秒杀商品 是否存在 获取不到锁就结束了
+            boolean isExist = redisDao.existsInventoryKey(seckillId);
+            if(!isExist){
+                // 1.1 Redis中不存在对应商品，加锁 + LOCK
+                String ret = redisDao.setSeckillLock(seckillId, userPhone);
+                if( ! "OK".equals(ret)){
+                    /*
+                    // 1.1.1 未获取到锁，抛出异常
+                    // throw new SeckillException("抢锁失败！");
+                    */
+                    int spinning=5;
+                    while(spinning > 0 && !"OK".equals(redisDao.existsInventoryKey(seckillId)) ){
+                        Thread.sleep(100);
+                        spinning--;
+                    }
+                    if(spinning <= 0 ){
+                        throw new SeckillException("抢锁失败！");
+                    }else if("OK".equals(redisDao.existsInventoryKey(seckillId))){
+                        lessToSellFlag = true;
+                    }
+                    // TODO 首次获取锁的过程中，可能1000个用户在抢锁，但是只有一个用户获取到，那么其他999个全部失败, 这种情况下可能导致少卖
+                    // 这种情况： 一共 10 个产品，1000人来抢，发现redis中没有数据 所以抢分布式锁，
+                    // 1000个就一个抢到了，999失败， ...，那就还有 9 个没卖出去
+                }
+                if(lessToSellFlag == false){
+                    // 1.1.2 加锁成功
+                    Seckill seckill = seckillDao.queryById(seckillId);
+                    if(seckill == null) {
+                        // 1.1.2.1 DB中不存在
+                        throw new SeckillException("该商品不属于秒杀商品");
+                    }else{
+                        // 1.1.2.2 DB中存在该数据
+                        redisDao.setInventory(seckill.getSeckillId(), seckill.getNumber()); // 重新更新放入
+                        // 释放锁 - LOCK： ret_release == 1 成功， == 0 已经释放锁
+                        Long ret_release = redisDao.releaseSeckillLock(seckillId, userPhone);
+                    }
+                }
+            }
+            long result = redisDao.callLuaScriptToDecrInventory(seckillId, userPhone);
+            if(result < 0){             // note：不加以判断则会出现DB、缓存不一致问题
+                throw new SeckillException("商品卖光光了！");
+            }
+            // ------------------ 通过 RocketMQ 将 秒杀系统 与 订单系统解耦
+            sendSeckillInfoToOrderSystem(seckillId, userPhone);
+            // -------------------------------------------------------------------------------------------------------
+            return new SeckillExecution( seckillId
+                    , SeckillStateEnum.SUCCESS
+                    , new SuccessKilled()); // TODO 秒杀记录未处理操作
+        }catch (SeckillCloseException | RepeatKillException e1){
+            // logger.error(e1.getMessage(), e1);
+            throw e1;
+        } catch (SeckillException e3){
+            // logger.error(e3.getMessage(), e3);
+            throw e3;
+        }catch (Exception e){
+            // logger.error(e.getMessage(), e);
+            throw new SeckillException("Seckill inner error " + e.getMessage());
+        }
+    }
+
+    /***
+     * executeSeckill 方法的Jmeter测试版本，
+     * 便于测试，取消了重复秒杀的判断，用户秒杀信息在 success_killed的存储
+     * lua + redis版本
+     * @param seckillId
+     * @param userPhone
+     * @param md5
+     * @return
+     * @throws SeckillException
+     * @throws RepeatKillException
+     * @throws SeckillCloseException
+     */
+    public SeckillExecution executeSeckillForJmeter_Version2(long seckillId, long userPhone, String md5)
             throws SeckillException, RepeatKillException, SeckillCloseException {
         if(md5 == null || !md5.equals(Md5Utils.getMD5(seckillId))){
             throw new SeckillException("秒杀路径错误！");
