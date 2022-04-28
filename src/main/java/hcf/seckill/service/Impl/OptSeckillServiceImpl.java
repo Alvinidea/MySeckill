@@ -214,6 +214,9 @@ public class OptSeckillServiceImpl implements OptSeckillService {
                     /*
                     // 1.1.1 未获取到锁，抛出异常
                     // throw new SeckillException("抢锁失败！");
+                    // TODO 首次获取锁的过程中，可能1000个用户在抢锁，但是只有一个用户获取到，那么其他999个全部失败, 这种情况下可能导致少卖\
+                    // 这种情况： 一共 10 个产品，1000人来抢，发现redis中没有数据 所以抢分布式锁，
+                    // 1000个就一个抢到了，999失败， ...，那就还有 9 个没卖出去
                     */
                     int spinning=5;
                     while(spinning > 0 && !"OK".equals(redisDao.existsInventoryKey(seckillId)) ){
@@ -225,9 +228,6 @@ public class OptSeckillServiceImpl implements OptSeckillService {
                     }else if("OK".equals(redisDao.existsInventoryKey(seckillId))){
                         lessToSellFlag = true;
                     }
-                    // TODO 首次获取锁的过程中，可能1000个用户在抢锁，但是只有一个用户获取到，那么其他999个全部失败, 这种情况下可能导致少卖
-                    // 这种情况： 一共 10 个产品，1000人来抢，发现redis中没有数据 所以抢分布式锁，
-                    // 1000个就一个抢到了，999失败， ...，那就还有 9 个没卖出去
                 }
                 if(lessToSellFlag == false){
                     // 1.1.2 加锁成功
@@ -265,6 +265,7 @@ public class OptSeckillServiceImpl implements OptSeckillService {
         }
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
     /***
      * executeSeckill 方法的Jmeter测试版本，
      * 便于测试，取消了重复秒杀的判断，用户秒杀信息在 success_killed的存储
