@@ -19,6 +19,8 @@ import java.util.Map;
  *  * 订单系统 - 消费消息
  * @author hechaofan
  * @date 2022/4/24 15:09
+ *
+ * MqConsumerListener 相当于 controller，接受的数据来自于
  */
 public class MqConsumerListener implements MessageListenerConcurrently {
 
@@ -47,7 +49,10 @@ public class MqConsumerListener implements MessageListenerConcurrently {
             //System.out.println(messageExt.toString());
             //System.out.println(new String(messageExt.getBody()));
         }
-        log.info("# getDelayLevelWhenNextConsume={} , getMessageQueue={} , getDelayLevelWhenNextConsume={}", context.getDelayLevelWhenNextConsume(), context.getMessageQueue(), context.getDelayLevelWhenNextConsume());
+        log.info("# getDelayLevelWhenNextConsume={} , getMessageQueue={} , getDelayLevelWhenNextConsume={}"
+                , context.getDelayLevelWhenNextConsume()
+                , context.getMessageQueue()
+                , context.getDelayLevelWhenNextConsume());
         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
     }
 }

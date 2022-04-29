@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 以上信息在MyBatis 官网上可以获取到
+https://mybatis.org/mybatis-3/configuration.html
+-->
+<mapper namespace="hcf.seckill.dao.IUserDao">
+
+    <select id="queryUserById" parameterType="long" resultType="hcf.seckill.entity.IUser">
+        select user_id ,user_phone, user_name, user_pwd, user_auth, user_description
+        from iuser
+        where user_id = #{userId}
+    </select>
+
+    <select id="queryUserByPhone" parameterType="long" resultType="hcf.seckill.entity.IUser">
+        select user_id ,user_phone, user_name, user_pwd, user_auth, user_description
+        from iuser
+        where user_phone = #{userPhone}
+    </select>
+
+
+    <insert id="createUser" parameterType="hcf.seckill.entity.IUser">
+        insert into iuser(
+        user_phone, user_name, user_pwd, user_auth, user_description)
+        values (#{user.userPhone}, #{user.userName}, #{user.userPwd},
+        #{user.userAuth}, #{user.userDescription})
+    </insert>
+
+
+    <select id="queryPwd" parameterType="long" resultType="java.lang.String">
+        select user_pwd
+        from iuser
+        where user_phone = #{userPhone}
+    </select>
+
+    <update id="updatePwd" parameterType="hcf.seckill.entity.IUser">
+        update iuser
+        set user_pwd = #{user.userPwd}
+        where user_phone = #{user.userPhone}
+    </update>
+</mapper>

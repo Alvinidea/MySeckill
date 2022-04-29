@@ -1,5 +1,7 @@
 package hcf.seckill.service;
 
+import hcf.seckill.dto.Login.LoginResult;
+import hcf.seckill.dto.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,7 @@ import javax.servlet.http.HttpSession;
  */
 public interface LoginService {
 
-        public boolean login(HttpServletResponse response, HttpSession session, Object loginVo);
+    public LoginResult login(UserVo userVo);
 
-        public void passTrans(Object loginVo);
-    }
+    public LoginResult register(UserVo userVo);
+}

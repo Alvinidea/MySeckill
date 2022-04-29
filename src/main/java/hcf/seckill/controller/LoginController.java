@@ -1,6 +1,8 @@
 package hcf.seckill.controller;
 
-import hcf.seckill.dto.LoginVo;
+import hcf.seckill.dto.Login.LoginResult;
+import hcf.seckill.dto.UserVo;
+import hcf.seckill.service.LoginService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
@@ -9,62 +11,46 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-@RestController
+@Controller
 public class LoginController extends BaseController{
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @RequestMapping("/login")
-    public Object login(HttpServletResponse response, HttpSession session, LoginVo loginVo, Model model)
-    {
-        // 获取当前用户
-        Subject subject = SecurityUtils.getSubject();
-        // 封装用户的登录数据
-        UsernamePasswordToken token = new UsernamePasswordToken(
-                String.valueOf(loginVo.getPhone()),
-                loginVo.getPwd());
-        try{
-            subject.login(token);
-        }catch (UnknownAccountException e){
-            logger.info("userErr", e);
-            return new Object();
-        }catch (IncorrectCredentialsException e){
-            logger.info("Pwd Err", e);
-            return new Object();
-        }
-        subject.logout();
-/*        *//* ========================================================================================================= *//*
-        *//* Shiro 部分 *//*
-        // 获取当前用户
-        Subject subject = SecurityUtils.getSubject();
-        loginService.passTrans(loginVo);
-        // 封装用户的登录数据
-        UsernamePasswordToken token = new UsernamePasswordToken(loginVo.getMobile(), loginVo.getPassword());
+    @Autowired
+    private LoginService loginService;
 
-        loginService.login(response, session, loginVo);
-        try{
-            subject.login(token);
-        }catch (UnknownAccountException e) {
-            model.addAttribute("msg","UserErr");
-            return MyResult.build();
-        }catch (IncorrectCredentialsException e){
-            model.addAttribute("msg", "Pwd Err");
-            return MyResult.build();
-        }
+    @RequestMapping("register")
+    public String registerView(Model model){
+        model.addAttribute("count", 0);
+        return "html/register";
+    }
 
-        *//* ========================================================================================================= *//*
-        MyResult<Boolean> result = MyResult.build();
-        session.setAttribute("user", loginVo.getMobile());
-        // loginService.login(response, session, loginVo);
-        return result;*/
-        return null;
+    @RequestMapping("/toRegister")
+    @ResponseBody
+    public LoginResult toRegister(UserVo userVo)
+    {        // 获取当前用户
+        LoginResult result = loginService.register(userVo);
+        return result;
+    }
+
+
+    @RequestMapping("login")
+    public String loginView(Model model){
+        model.addAttribute("count", 0);
+        return "html/login";
+    }
+
+    @RequestMapping("/toLogin")
+    @ResponseBody
+    public LoginResult toLogin(UserVo userVo)
+    {        // 获取当前用户
+        LoginResult result = loginService.login(userVo);
+        return result;
     }
 
 /*

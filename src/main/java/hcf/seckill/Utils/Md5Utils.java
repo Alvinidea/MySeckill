@@ -16,4 +16,10 @@ public class Md5Utils {
         String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
         return md5;
     }
+
+    public static String getMD5byUserPwd(String pwd){
+        String base = pwd  + "/"+ slat;
+        String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
+        return md5;
+    }
 }

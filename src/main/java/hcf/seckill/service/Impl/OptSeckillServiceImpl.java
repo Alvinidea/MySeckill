@@ -42,8 +42,8 @@ public class OptSeckillServiceImpl implements OptSeckillService {
     private SuccessKilledDao successKilledDao;
 
     // 消息队列，消息生产者
-    @Autowired
-    private MqProducer mqProducer;
+    //@Autowired
+    //private MqProducer mqProducer;
 
     /**
      * 秒杀开启时输出秒杀接口地址，否则输出系统时间和秒杀时间
@@ -218,13 +218,14 @@ public class OptSeckillServiceImpl implements OptSeckillService {
                     // 这种情况： 一共 10 个产品，1000人来抢，发现redis中没有数据 所以抢分布式锁，
                     // 1000个就一个抢到了，999失败， ...，那就还有 9 个没卖出去
                     */
-                    int spinning=5;
+                    // 使用自旋 + 等待的方式进行解决
+                    int spinning=3;
                     while(spinning > 0 && !"OK".equals(redisDao.existsInventoryKey(seckillId)) ){
                         Thread.sleep(100);
                         spinning--;
                     }
                     if(spinning <= 0 ){
-                        throw new SeckillException("抢锁失败！");
+                        throw new SeckillException("秒杀失败！");
                     }else if("OK".equals(redisDao.existsInventoryKey(seckillId))){
                         lessToSellFlag = true;
                     }

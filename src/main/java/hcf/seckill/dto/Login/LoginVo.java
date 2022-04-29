@@ -1,4 +1,4 @@
-package hcf.seckill.dto;
+package hcf.seckill.dto.Login;
 
 /**
  * @author hechaofan
