@@ -3,8 +3,9 @@ package hcf.seckill.service.Impl;
 
 import hcf.seckill.dao.IUserDao;
 import hcf.seckill.dto.Login.LoginResult;
-import hcf.seckill.dto.UserVo;
+import hcf.seckill.dto.Login.UserVo;
 import hcf.seckill.entity.IUser;
+import hcf.seckill.enums.LoginStateEnum;
 import hcf.seckill.service.LoginService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -15,9 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @Service
 public class LoginServiceImpl implements LoginService {
@@ -38,13 +36,13 @@ public class LoginServiceImpl implements LoginService {
             subject.login(token);
         }catch (UnknownAccountException e){
             logger.error(e.getMessage());
-            return new LoginResult(2, "err");
+            return new LoginResult(LoginStateEnum.LOGIN_NO_USER);
         }catch (IncorrectCredentialsException e){
             logger.error(e.getMessage());
-            return new LoginResult(3, "err");
+            return new LoginResult(LoginStateEnum.LOGIN_ERR_PWD);
         }
         // subject.logout();
-        return new LoginResult();
+        return new LoginResult(LoginStateEnum.LOGIN_SUCCESS);
     }
 
     public LoginResult register(UserVo userVo){
@@ -56,8 +54,8 @@ public class LoginServiceImpl implements LoginService {
         iUser.setUserDescription("fisher");
         int ret = iUserDao.createUser(iUser);
         if(ret != 1){
-            new LoginResult(21, "register error");
+            new LoginResult(LoginStateEnum.REGISTER_ERR_UNKNOWM);
         }
-        return new LoginResult(20, "register OK");
+        return new LoginResult(LoginStateEnum.REGISTER_SUCCESS);
     }
 }

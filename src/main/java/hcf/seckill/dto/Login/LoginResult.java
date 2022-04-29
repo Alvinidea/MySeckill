@@ -1,5 +1,7 @@
 package hcf.seckill.dto.Login;
 
+import hcf.seckill.enums.LoginStateEnum;
+
 /**
  * @author hechaofan
  * @date 2022/4/29 12:51
@@ -11,7 +13,12 @@ public class LoginResult {
 
 
     public LoginResult() {
-        this(1, "登录成功");
+        this(LoginStateEnum.LOGIN_SUCCESS);
+    }
+
+    public LoginResult(LoginStateEnum loginStateEnum) {
+        this.code = loginStateEnum.getCode();
+        this.description = loginStateEnum.getDescription();
     }
 
     public LoginResult(int code, String description) {

@@ -1,12 +1,7 @@
 package hcf.seckill.service;
 
 import hcf.seckill.dto.Login.LoginResult;
-import hcf.seckill.dto.UserVo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import hcf.seckill.dto.Login.UserVo;
 
 /**
  * @author hechaofan

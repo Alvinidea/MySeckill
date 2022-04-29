@@ -1,13 +1,8 @@
 package hcf.seckill.controller;
 
 import hcf.seckill.dto.Login.LoginResult;
-import hcf.seckill.dto.UserVo;
+import hcf.seckill.dto.Login.UserVo;
 import hcf.seckill.service.LoginService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
